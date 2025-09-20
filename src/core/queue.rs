@@ -2,8 +2,9 @@ pub enum QueueInputError {}
 
 pub enum QueueOutputError {}
 
-pub trait Queue<QueueItem> {
-    fn input(&self) -> Result<(), QueueInputError>;
+#[async_trait::async_trait]
+pub trait Queue<T: Send + 'static> {
+    fn input(&self, item: T) -> Result<(), QueueInputError>;
 
-    fn output(&self) -> Result<QueueItem, QueueOutputError>;
+    fn output(&self) -> Result<T, QueueOutputError>;
 }
