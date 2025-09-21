@@ -1,10 +1,14 @@
+#[derive(Debug, PartialEq)]
 pub enum QueueInputError {}
 
-pub enum QueueOutputError {}
+#[derive(Debug, PartialEq)]
+pub enum QueueOutputError {
+    Empty,
+}
 
 #[async_trait::async_trait]
-pub trait Queue<T: Send + 'static> {
-    fn input(&self, item: T) -> Result<(), QueueInputError>;
+pub trait Queue<T: Send> {
+    async fn input(&mut self, item: T) -> Result<(), QueueInputError>;
 
-    fn output(&self) -> Result<T, QueueOutputError>;
+    async fn output(&mut self) -> Result<T, QueueOutputError>;
 }
