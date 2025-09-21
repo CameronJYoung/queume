@@ -1,5 +1,7 @@
 #[derive(Debug, PartialEq)]
-pub enum QueueInputError {}
+pub enum QueueInputError {
+    MaxSize,
+}
 
 #[derive(Debug, PartialEq)]
 pub enum QueueOutputError {
