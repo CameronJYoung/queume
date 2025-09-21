@@ -1,22 +1,20 @@
 use std::collections::VecDeque;
 
-use crate::core::queue::{Queue, QueueInputError, QueueOutputError};
-
-#[derive(Default)]
-pub struct FifoQueueConfig {
-    pub max_size: Option<usize>,
-}
+use crate::core::{
+    config::QueueConfig,
+    queue::{Queue, QueueInputError, QueueOutputError},
+};
 
 #[derive(Default)]
 pub struct FifoQueue<T> {
-    config: FifoQueueConfig,
+    queue_config: QueueConfig,
     items: VecDeque<T>,
 }
 
 impl<T> FifoQueue<T> {
-    pub fn new(config: FifoQueueConfig) -> Self {
+    pub fn new(queue_config: QueueConfig) -> Self {
         Self {
-            config,
+            queue_config,
             items: VecDeque::new(),
         }
     }
@@ -33,7 +31,7 @@ impl<T> FifoQueue<T> {
 #[async_trait::async_trait]
 impl<T: Send> Queue<T> for FifoQueue<T> {
     async fn input(&mut self, item: T) -> Result<(), QueueInputError> {
-        if self.config.max_size.is_some_and(|m| self.len() == m) {
+        if self.queue_config.max_size.is_some_and(|m| self.len() == m) {
             return Err(QueueInputError::MaxSize);
         }
 
@@ -84,7 +82,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_input_after_max_size_errors() {
-        let queue_config = FifoQueueConfig { max_size: Some(1) };
+        let queue_config = QueueConfig { max_size: Some(1) };
         let mut queue: FifoQueue<String> = FifoQueue::new(queue_config);
 
         queue.input("test".to_string()).await.unwrap();
