@@ -16,6 +16,10 @@ impl<T> FifoQueue<T> {
     pub fn len(&self) -> usize {
         self.items.len()
     }
+
+    pub fn clear(&mut self) {
+        self.items.clear();
+    }
 }
 
 #[async_trait::async_trait]
@@ -39,6 +43,23 @@ impl<T: Send> Queue<T> for FifoQueue<T> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[tokio::test]
+    async fn test_initial_len_zero() {
+        let queue: FifoQueue<String> = FifoQueue::new();
+
+        assert_eq!(queue.len(), 0);
+    }
+
+    #[tokio::test]
+    async fn test_clear_queue() {
+        let mut queue: FifoQueue<String> = FifoQueue::new();
+        queue.input("test".to_string()).await.unwrap();
+
+        queue.clear();
+
+        assert_eq!(queue.len(), 0);
+    }
 
     #[tokio::test]
     async fn test_input_adds_item_to_queue() {
