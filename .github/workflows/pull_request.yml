@@ -13,5 +13,11 @@ jobs:
       - name: Checkout Project
         uses: actions/checkout@v5
 
-      - name: Test
+      - name: Install Rust Toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+
+      - name: Run Cargo Tests
         run: cargo test
