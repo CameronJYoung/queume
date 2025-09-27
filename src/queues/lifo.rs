@@ -41,7 +41,7 @@ impl<T: Send> Queue<T> for LifoQueue<T> {
     }
 
     async fn output(&mut self) -> Result<T, QueueOutputError> {
-        let out_item = self.items.pop_front();
+        let out_item = self.items.pop_back();
 
         match out_item {
             Some(i) => Ok(i),
