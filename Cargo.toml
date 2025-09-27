@@ -2,6 +2,10 @@
 name = "queueme"
 version = "0.1.0"
 edition = "2024"
+license = "MIT OR Apache-2.0"
+description = "Small library for various queue related tasks"
+readme = "README.md"
+keywords = ["queue"]
 
 [dependencies]
 async-trait = "0.1.89"

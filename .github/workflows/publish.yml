@@ -1,0 +1,6 @@
+name: Publish Queueme To crates.io
+
+on:
+  push:
+    branches:
+      - main
