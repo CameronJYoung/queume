@@ -66,7 +66,7 @@ mod tests {
     async fn test_clear_queue() {
         let mut queue: FifoQueue<String> = FifoQueue::default();
 
-        let message = Message::new("test_id".to_string(), 1, "test".to_string());
+        let message = Message::new("test_id".to_string(), 1, 1, "test".to_string());
 
         queue.input(message).await.unwrap();
 
@@ -79,7 +79,7 @@ mod tests {
     async fn test_input_adds_item_to_queue() {
         let mut queue: FifoQueue<String> = FifoQueue::default();
 
-        let message = Message::new("test_id".to_string(), 1, "test".to_string());
+        let message = Message::new("test_id".to_string(), 1, 1, "test".to_string());
 
         queue.input(message).await.unwrap();
 
@@ -91,8 +91,8 @@ mod tests {
         let queue_config = QueueConfig { max_size: Some(1) };
         let mut queue: FifoQueue<String> = FifoQueue::new(queue_config);
 
-        let message_one = Message::new("test_id_one".to_string(), 1, "test".to_string());
-        let message_two = Message::new("test_id_two".to_string(), 2, "test2".to_string());
+        let message_one = Message::new("test_id_one".to_string(), 1, 1, "test".to_string());
+        let message_two = Message::new("test_id_two".to_string(), 2, 1, "test2".to_string());
 
         queue.input(message_one).await.unwrap();
         let out = queue.input(message_two).await;
@@ -105,7 +105,7 @@ mod tests {
     async fn test_output_returns_item() {
         let mut queue: FifoQueue<String> = FifoQueue::default();
 
-        let message = Message::new("test_id".to_string(), 1, "test".to_string());
+        let message = Message::new("test_id".to_string(), 1, 1, "test".to_string());
         let message_clone = message.clone();
 
         queue.input(message).await.unwrap();
@@ -119,8 +119,8 @@ mod tests {
     async fn test_output_returns_first_item() {
         let mut queue: FifoQueue<String> = FifoQueue::default();
 
-        let message_one = Message::new("test_id_one".to_string(), 1, "test".to_string());
-        let message_two = Message::new("test_id_two".to_string(), 2, "test2".to_string());
+        let message_one = Message::new("test_id_one".to_string(), 1, 1, "test".to_string());
+        let message_two = Message::new("test_id_two".to_string(), 2, 2, "test2".to_string());
 
         let message_one_clone = message_one.clone();
 
@@ -136,7 +136,7 @@ mod tests {
     async fn test_output_removes_item() {
         let mut queue: FifoQueue<String> = FifoQueue::default();
 
-        let message = Message::new("test_id".to_string(), 1, "test".to_string());
+        let message = Message::new("test_id".to_string(), 1, 2, "test".to_string());
 
         queue.input(message).await.unwrap();
 
