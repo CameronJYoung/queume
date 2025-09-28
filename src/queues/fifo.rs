@@ -2,13 +2,14 @@ use std::collections::VecDeque;
 
 use crate::core::{
     config::QueueConfig,
+    message::Message,
     queue::{Queue, QueueInputError, QueueOutputError},
 };
 
 #[derive(Default)]
 pub struct FifoQueue<T> {
     queue_config: QueueConfig,
-    items: VecDeque<T>,
+    items: VecDeque<Message<T>>,
 }
 
 impl<T> FifoQueue<T> {
@@ -30,7 +31,7 @@ impl<T> FifoQueue<T> {
 
 #[async_trait::async_trait]
 impl<T: Send> Queue<T> for FifoQueue<T> {
-    async fn input(&mut self, item: T) -> Result<(), QueueInputError> {
+    async fn input(&mut self, item: Message<T>) -> Result<(), QueueInputError> {
         if self.queue_config.max_size.is_some_and(|m| self.len() == m) {
             return Err(QueueInputError::MaxSize);
         }
@@ -40,7 +41,7 @@ impl<T: Send> Queue<T> for FifoQueue<T> {
         Ok(())
     }
 
-    async fn output(&mut self) -> Result<T, QueueOutputError> {
+    async fn output(&mut self) -> Result<Message<T>, QueueOutputError> {
         let out_item = self.items.pop_front();
 
         match out_item {
@@ -64,7 +65,10 @@ mod tests {
     #[tokio::test]
     async fn test_clear_queue() {
         let mut queue: FifoQueue<String> = FifoQueue::default();
-        queue.input("test".to_string()).await.unwrap();
+
+        let message = Message::new("test_id".to_string(), 1, "test".to_string());
+
+        queue.input(message).await.unwrap();
 
         queue.clear();
 
@@ -75,7 +79,9 @@ mod tests {
     async fn test_input_adds_item_to_queue() {
         let mut queue: FifoQueue<String> = FifoQueue::default();
 
-        queue.input("test".to_string()).await.unwrap();
+        let message = Message::new("test_id".to_string(), 1, "test".to_string());
+
+        queue.input(message).await.unwrap();
 
         assert_eq!(queue.len(), 1);
     }
@@ -85,8 +91,11 @@ mod tests {
         let queue_config = QueueConfig { max_size: Some(1) };
         let mut queue: FifoQueue<String> = FifoQueue::new(queue_config);
 
-        queue.input("test".to_string()).await.unwrap();
-        let out = queue.input("test2".to_string()).await;
+        let message_one = Message::new("test_id_one".to_string(), 1, "test".to_string());
+        let message_two = Message::new("test_id_two".to_string(), 2, "test2".to_string());
+
+        queue.input(message_one).await.unwrap();
+        let out = queue.input(message_two).await;
 
         assert_eq!(queue.len(), 1);
         assert_eq!(out, Err(QueueInputError::MaxSize));
@@ -96,30 +105,40 @@ mod tests {
     async fn test_output_returns_item() {
         let mut queue: FifoQueue<String> = FifoQueue::default();
 
-        queue.input("test".to_string()).await.unwrap();
+        let message = Message::new("test_id".to_string(), 1, "test".to_string());
+        let message_clone = message.clone();
+
+        queue.input(message).await.unwrap();
 
         let out = queue.output().await.unwrap();
 
-        assert_eq!(out, "test".to_string());
+        assert_eq!(out, message_clone);
     }
 
     #[tokio::test]
     async fn test_output_returns_first_item() {
         let mut queue: FifoQueue<String> = FifoQueue::default();
 
-        queue.input("test".to_string()).await.unwrap();
-        queue.input("test2".to_string()).await.unwrap();
+        let message_one = Message::new("test_id_one".to_string(), 1, "test".to_string());
+        let message_two = Message::new("test_id_two".to_string(), 2, "test2".to_string());
+
+        let message_one_clone = message_one.clone();
+
+        queue.input(message_one).await.unwrap();
+        queue.input(message_two).await.unwrap();
 
         let out = queue.output().await.unwrap();
 
-        assert_eq!(out, "test".to_string());
+        assert_eq!(out, message_one_clone);
     }
 
     #[tokio::test]
     async fn test_output_removes_item() {
         let mut queue: FifoQueue<String> = FifoQueue::default();
 
-        queue.input("test".to_string()).await.unwrap();
+        let message = Message::new("test_id".to_string(), 1, "test".to_string());
+
+        queue.input(message).await.unwrap();
 
         let _ = queue.output().await.unwrap();
 
