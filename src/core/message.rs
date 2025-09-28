@@ -1,4 +1,4 @@
-#[derive(Default)]
+#[derive(Default, Clone, Debug, Eq, PartialEq)]
 pub struct Message<T> {
     pub id: String,
     pub unix_timestamp: i64,
