@@ -1,9 +1,11 @@
 name: Publish Queueme To crates.io
 
 on:
-  push:
-    branches:
-      - main
+#  push:
+#    branches:
+#      - main
+  workflow_dispatch:
+
 
 jobs:
   publish:
