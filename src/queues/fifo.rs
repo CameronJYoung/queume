@@ -3,7 +3,7 @@ use std::collections::VecDeque;
 use crate::core::{
     config::QueueConfig,
     message::Message,
-    queue::{Queue, QueueInputError, QueueOutputError, QueueSequenceCalcError},
+    queue::{OrderedQueue, Queue, QueueInputError, QueueOutputError, QueueSequenceCalcError},
 };
 
 #[derive(Default)]
@@ -49,7 +49,10 @@ impl<T: Send> Queue<T> for FifoQueue<T> {
             None => Err(QueueOutputError::Empty),
         }
     }
+}
 
+#[async_trait::async_trait]
+impl<T: Send> OrderedQueue<T> for FifoQueue<T> {
     async fn get_next_sequence_count(&mut self) -> Result<u64, QueueSequenceCalcError> {
         if self.queue_config.max_size.is_some_and(|m| self.len() == m) {
             return Err(QueueSequenceCalcError::MaxSize);
